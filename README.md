@@ -1,8 +1,8 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/-jWdCFXs)
 ## Project 00
 ### NeXTCS
-### Period: 
-## Thinker0: YOUR NAME HERE
+### Period: 10
+## Thinker0: Alex J
 ## Thinker1: OTHER NAME HERE
 ## Thinker2: OTHER NAME HERE (delete this line if you are a duo)
 ---
