@@ -2,7 +2,7 @@
 ## Project 00
 ### NeXTCS
 ### Period: 10
-## Thinker0: Alex J
+## Thinker0: Alex Jiang
 ## Thinker1: Tashfia Diha
 ## Thinker2: Wenbo Zhou
 ---
