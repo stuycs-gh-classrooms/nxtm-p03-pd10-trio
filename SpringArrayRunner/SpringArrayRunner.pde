@@ -1,9 +1,9 @@
 
 /**
-Alex Jiang
-lab08 -- physics lab 
+Alex J, Tashfia Diha, Wenbo Zhou
 2026-03-16
-time spent: 2.5
+P03 -- making a custom force
+time spent: N/A
 */
 
 /** -----------------------------------------------
