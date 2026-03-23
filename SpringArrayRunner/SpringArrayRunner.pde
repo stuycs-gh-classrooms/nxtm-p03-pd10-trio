@@ -1,10 +1,10 @@
 
 /**
-Alex J, Tashfia Diha, Wenbo Zhou
-2026-03-16
-P03 -- making a custom force
-time spent: N/A
-*/
+ Alex J, Tashfia Diha, Wenbo Zhou
+ 2026-03-16
+ P03 -- making a custom force
+ time spent: N/A
+ */
 
 /** -----------------------------------------------
  SpringArrayDriver (Most Work Goes Here)
@@ -60,12 +60,12 @@ int orbCount;
 
 void setup()
 {
-  size(600, 600);
+  size(1000, 1000);
 
   //Part 0: Write makeOrbs below
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
-  earth = new FixedOrb (); //set earth to be in the middle 
+  earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
   earth.c = #0000FF;
 }//setup
 
@@ -87,7 +87,7 @@ void draw()
     //Part 1: write drawSpring below
     //Use drawspring correctly to draw springs
   }//draw orbs & springs
-  
+
   if (toggles[MOVING]) {
     //Part 2: write applySprings below
     applySprings();
@@ -96,13 +96,12 @@ void draw()
     for (int o=0; o < orbCount; o++) {
       if (toggles[GRAVITY])
       {
-      orbs[o].applyForce (orbs[o].getGravity (earth, G_CONSTANT));
+        orbs[o].applyForce (orbs[o].getGravity (earth, G_CONSTANT));
       }
       if (toggles[DRAGF])
       {
         orbs[o].applyForce (orbs[o].getDragForce (D_COEF ));
       }
-      
     }//gravity, drag
 
     for (int o=0; o < orbCount; o++) {
@@ -136,11 +135,12 @@ void makeOrbs(boolean ordered)
     if (i == 0)
     {
       orbs[i] = new FixedOrb(); //first orb is fixed
-    }
-    else if (ordered)
+    } else if (ordered)
     {
-      int x = 50 + i * SPRING_LENGTH;
-      int y = height/2;
+      int theta = 30; 
+      int amplitude = 40;
+      float x = getCosX (theta * i, amplitude * i + 50);
+      float y = getSineY (theta * i, amplitude * i+ 50);
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
       orbs[i] = new Orb (x, y, mass, bsize);
@@ -166,12 +166,10 @@ void drawSpring(Orb o0, Orb o1)
   if (distance > SPRING_LENGTH)
   {
     stroke (255, 0, 0);
-  }
-  else if (distance < SPRING_LENGTH)
+  } else if (distance < SPRING_LENGTH)
   {
     stroke (0, 255, 0);
-  }
-  else if (distance == SPRING_LENGTH)
+  } else if (distance == SPRING_LENGTH)
   {
     stroke (0);
   }
@@ -193,13 +191,13 @@ void drawSpring(Orb o0, Orb o1)
  */
 void applySprings()
 {
-  for (int o = 0; o <orbCount ; o ++)
+  for (int o = 0; o <orbCount; o ++)
   {
     if (o <  orbCount - 1)
     {
       PVector sForce = orbs[o].getSpring (orbs[o +1], SPRING_LENGTH, SPRING_K);
       orbs[o].applyForce (sForce);
-      PVector opposite = sForce.copy().mult (-1); //the other orb has to feel another force as well 
+      PVector opposite = sForce.copy().mult (-1); //the other orb has to feel another force as well
       orbs[o+1].applyForce (opposite);
     }
   }
@@ -218,21 +216,38 @@ void applySprings()
  */
 void addOrb()
 {
-  Orb [] tempArr; //creates temp array 
-  tempArr = new Orb [orbCount + 1]; //sets its length to be one more than orbs 
+  Orb [] tempArr; //creates temp array
+  tempArr = new Orb [orbCount + 1]; //sets its length to be one more than orbs
   arrayCopy (orbs, 0, tempArr, 0, orbCount); // copies the entire array of Orbs and pastes it on to tempArry
-  tempArr[tempArr.length -1] = new Orb(); //add a new orb to the last index of tempArr 
+  tempArr[tempArr.length -1] = new Orb(); //add a new orb to the last index of tempArr
   orbs = tempArr; //set orbs to tempArr
-  orbCount ++; //increases the orbCOunt 
+  orbCount ++; //increases the orbCOunt
 }//addOrb
 
 void removeOrb ()
 {
-  Orb [] tempArr; 
+  Orb [] tempArr;
   tempArr = new Orb [orbCount - 1];
   arrayCopy (orbs, 0, tempArr, 0, orbCount -1);
-  orbs = tempArr; 
+  orbs = tempArr;
   orbCount --;
+}
+
+//takes a theta + amplitdude and returns a y value by taking the sin value 
+
+float getSineY (int theta, float amplitude)
+{
+  float y = amplitude * sin (radians (theta)) + height/2; //add the offset to center it 
+  return y;
+}
+
+
+//takes a theta + amplitude and returns a x value by taking the cos value
+
+float getCosX (int theta, float amplitude)
+{
+  float x = amplitude * cos (radians (theta)) + width/2; //add the offset to center it 
+  return x;
 }
 
 
