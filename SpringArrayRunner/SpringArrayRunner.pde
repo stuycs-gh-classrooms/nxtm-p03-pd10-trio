@@ -64,10 +64,11 @@ void setup()
   size(1000, 1000);
 
   //Part 0: Write makeOrbs below
+   earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
+  earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
-  earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
-  earth.c = #0000FF;
+ 
 }//setup
 
 
@@ -154,7 +155,7 @@ void makeOrbs(boolean ordered)
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
       orbs[i] = new Orb (x, y, mass, bsize);
-      
+      setTangentialVelocity (orbs[i]); //spawns the orbs with tangental velocity that let them orbit , but if velocity ever changes, it will fall out of orbit 
     } 
     else {
       orbs[i] = new Orb(); //random position generators
@@ -262,6 +263,17 @@ float getCosX (int theta, float amplitude)
   return x;
 }
 
+void setTangentialVelocity (Orb o)
+{
+  PVector direction = PVector.sub (earth.center, o.center);
+  float r = direction.mag(); 
+  direction.normalize();
+  PVector tangent = new PVector (-direction.y, direction.x);
+  float speed = sqrt (G_CONSTANT * earth.mass / r); //from formula for orbit speed. If the speed is any greater, then the orbs will escape orbit
+  tangent.mult (speed);
+  o.velocity = tangent; 
+}
+
 
 /**
  keyPressed()
@@ -286,7 +298,7 @@ void keyPressed()
   }
   if (key == 's') {
     toggles[SPRING]  = !toggles[SPRING];
-  }
+  } 
   if (key == '1') {
     makeOrbs(true);
   }
