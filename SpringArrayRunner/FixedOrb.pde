@@ -6,7 +6,7 @@ class FixedOrb extends Orb
    */
   FixedOrb(float x, float y, float s, float m)
   {
-    super(x, y, s, m);
+    super(x, y, s, m, int (random( -10, 10))); //fixed orb (earth) will have no charge 
     c = color(255, 0, 0);
   }
 
@@ -26,4 +26,25 @@ class FixedOrb extends Orb
   {
     //do nothing
   }
+  
+  void display ()
+  {
+    noStroke();
+    fill(c);
+    circle(center.x, center.y, bsize);
+    fill(255);
+    if (charge == Positive)
+    {   
+      textAlign(CENTER,CENTER);
+      textSize (int (bsize / 2));
+      text ("+", center.x, center.y);
+    }
+    if (charge == Negative)
+    {
+      textAlign(CENTER,CENTER);
+      textSize (int (bsize / 2));
+      text ("-", center.x, center.y);
+    }
+    //text(mass, center.x, center.y);
+  }//display
 }//fixedOrb

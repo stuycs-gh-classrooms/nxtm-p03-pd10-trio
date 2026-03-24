@@ -42,6 +42,7 @@ float MIN_MASS = 10;
 float MAX_MASS = 100;
 float G_CONSTANT = 1;
 float D_COEF = 0.1;
+float K_CONSTANT = 100;
 
 int SPRING_LENGTH = 50;
 float  SPRING_K = 0.005;
@@ -51,8 +52,13 @@ int BOUNCE = 1;
 int GRAVITY = 2;
 int DRAGF = 3;
 int SPRING = 4;
-boolean[] toggles = new boolean[5];
-String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring"};
+int ElectroS = 5;
+
+int Positive = 1;
+int Negative = -1;
+
+boolean[] toggles = new boolean[6];
+String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring", "ElectroS"};
 
 FixedOrb earth;
 Orb[] orbs;
@@ -64,13 +70,13 @@ void setup()
   size(1000, 1000);
 
   //Part 0: Write makeOrbs below
-   earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
+  earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
   earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
- for (int i = 0; i < orbCount; i++) {
-  orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
- }
+  for (int i = 0; i < orbCount; i++) {
+    orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
+  }
 }//setup
 
 
@@ -113,7 +119,16 @@ void draw()
       {
         orbs[o].applyForce (orbs[o].getDragForce (D_COEF ));
       }
-    }//gravity, drag
+      if (toggles [ElectroS])
+      {
+        if (orbs[o].charge != 0)
+        {
+
+          orbs[o].applyForce (orbs[o].getElectricStatic (earth, K_CONSTANT));
+        }
+      }
+    }//gravity, drag, and electrostatic
+
 
     for (int o=0; o < orbCount; o++) {
       orbs[o].move(toggles[BOUNCE]);
@@ -156,10 +171,9 @@ void makeOrbs(boolean ordered)
       float y = getSineY (theta * i, amplitude * i + 100);
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
-      orbs[i] = new Orb (x, y, mass, bsize);
-      setTangentialVelocity (orbs[i]); //spawns the orbs with tangental velocity that let them orbit , but if velocity ever changes, it will fall out of orbit 
-    } 
-    else {
+      orbs[i] = new Orb (x, y, mass, bsize, int (random (-2, 2))); //int rounds upwards so by including -2, it creates negative chargess
+      //setTangentialVelocity (orbs[i]); //spawns the orbs with tangental velocity that let them orbit , but if velocity ever changes, it will fall out of orbit
+    } else {
       orbs[i] = new Orb(); //random position generators
     }
   }
@@ -265,18 +279,21 @@ float getCosX (int theta, float amplitude)
   return x;
 }
 
-void setTangentialVelocity (Orb o)
-{
-  PVector direction = PVector.sub (earth.center, o.center);
-  float r = direction.mag(); 
-  direction.normalize();
-  PVector tangent = new PVector (-direction.y, direction.x);
-  float speed = sqrt (G_CONSTANT * earth.mass / r); //from formula for orbit speed. If the speed is any greater, then the orbs will escape orbit
-  tangent.mult (speed);
-  o.velocity = tangent; 
-}
+/*
 
-
+ void setTangentialVelocity (Orb o)
+ {
+ PVector direction = PVector.sub (earth.center, o.center);
+ float r = direction.mag();
+ direction.normalize();
+ PVector tangent = new PVector (-direction.y, direction.x);
+ float speed = sqrt (G_CONSTANT * earth.mass / r); //from formula for orbit speed. If the speed is any greater, then the orbs will escape orbit
+ tangent.mult (speed);
+ o.velocity = tangent;
+ }
+ 
+/*
+ 
 /**
  keyPressed()
  
@@ -300,7 +317,10 @@ void keyPressed()
   }
   if (key == 's') {
     toggles[SPRING]  = !toggles[SPRING];
-  } 
+  }
+  if (key == 'e') {
+    toggles[ElectroS]  = !toggles[ElectroS];
+  }
   if (key == '1') {
     makeOrbs(true);
   }

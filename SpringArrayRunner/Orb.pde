@@ -8,6 +8,7 @@ class Orb
   float bsize;
   float mass;
   color c;
+  float charge;
 
 
   /**
@@ -23,6 +24,8 @@ class Orb
     velocity = new PVector();
     acceleration = new PVector();
     setColor();
+    charge = int (random (-2, 2)); //randomly sets the chrage to either -1 or 1
+    println (charge);
   }
 
 
@@ -30,7 +33,7 @@ class Orb
    This constructor takes 4 parameters, an x and y value for the center of the orb, a size for the orb, and a mass for the orb.
    It also instantuates the attirbutes of Velocity and Acceleration.
    */
-  Orb(float x, float y, float s, float m)
+  Orb(float x, float y, float s, float m, float c)
   {
     bsize = s;
     mass = m;
@@ -38,6 +41,8 @@ class Orb
     velocity = new PVector();
     acceleration = new PVector();
     setColor();
+    charge = c;
+        println (charge);
   }
 
 
@@ -119,6 +124,22 @@ class Orb
     r.rotate(HALF_PI);
     // we need to rotate the directon of the vector so it's pointing 90 degrees from the fixed orb
     return r;
+  }
+
+
+  //K is the electrostatic constant, but we will keep it a smaller number
+  PVector getElectricStatic (FixedOrb other, float K)
+  {
+    PVector force = PVector.sub(other.center, center);
+    float r = max (force.mag(), MIN_SIZE);
+    force.normalize();
+    float strength = K * abs (charge * other.charge) / (r * r);
+    force.mult(strength);
+    if ((charge > 0 &&  other.charge > 0) || (charge < 0 && other.charge <0))
+    {
+      force.rotate (PI);
+    }
+    return force;
   }
 
   /**
@@ -219,7 +240,19 @@ class Orb
     noStroke();
     fill(c);
     circle(center.x, center.y, bsize);
-    fill(0);
+    fill(255);
+    if (charge == Positive)
+    {   
+      textAlign(CENTER,CENTER);
+      textSize (int (bsize / 2));
+      text ("+", center.x, center.y);
+    }
+    if (charge == Negative)
+    {
+      textAlign(CENTER,CENTER);
+      textSize (int (bsize / 2));
+      text ("-", center.x, center.y);
+    }
     //text(mass, center.x, center.y);
   }//display
 }//Ball
