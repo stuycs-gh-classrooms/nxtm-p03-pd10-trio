@@ -50,8 +50,9 @@ int MOVING = 0;
 int BOUNCE = 1;
 int GRAVITY = 2;
 int DRAGF = 3;
-boolean[] toggles = new boolean[4];
-String[] modes = {"Moving", "Bounce", "Gravity", "Drag"};
+int SPRING = 4;
+boolean[] toggles = new boolean[5];
+String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring"};
 
 FixedOrb earth;
 Orb[] orbs;
@@ -79,9 +80,12 @@ void draw()
   //draw the orbs and springs
   for (int o=0; o < orbCount; o++) {
     orbs[o].display();
-    if (o != orbCount -1)
+    if (toggles [SPRING])
     {
-      drawSpring (orbs[o], orbs[o + 1]);
+      if (o != orbCount -1)
+      {
+        drawSpring (orbs[o], orbs[o + 1]);
+      }
     }
 
     //Part 1: write drawSpring below
@@ -89,8 +93,12 @@ void draw()
   }//draw orbs & springs
 
   if (toggles[MOVING]) {
-    //Part 2: write applySprings below
-    applySprings();
+    //applies spring force when spring force is toggled
+
+    if (toggles [SPRING])
+    {
+      applySprings();
+    }
 
     //part 3: apply other forces if toggled on
     for (int o=0; o < orbCount; o++) {
@@ -132,19 +140,23 @@ void makeOrbs(boolean ordered)
   orbs = new Orb[orbCount];
   for (int i = 0; i < orbCount; i ++)
   {
-    if (i == 0)
+    /*if (i == 0)
+     {
+     orbs[i] = new FixedOrb(); //first orb is fixed
+     }
+     */
+    if (ordered)
     {
-      orbs[i] = new FixedOrb(); //first orb is fixed
-    } else if (ordered)
-    {
-      int theta = 30; 
+      int theta = 30;
       int amplitude = 40;
-      float x = getCosX (theta * i, amplitude * i + 50);
-      float y = getSineY (theta * i, amplitude * i+ 50);
+      float x = getCosX (theta * i, amplitude * i + 100); //+ 100 offset makes sure the orbs don't spawn on earth
+      float y = getSineY (theta * i, amplitude * i+ 100);
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
       orbs[i] = new Orb (x, y, mass, bsize);
-    } else {
+      
+    } 
+    else {
       orbs[i] = new Orb(); //random position generators
     }
   }
@@ -233,11 +245,11 @@ void removeOrb ()
   orbCount --;
 }
 
-//takes a theta + amplitdude and returns a y value by taking the sin value 
+//takes a theta + amplitdude and returns a y value by taking the sin value
 
 float getSineY (int theta, float amplitude)
 {
-  float y = amplitude * sin (radians (theta)) + height/2; //add the offset to center it 
+  float y = amplitude * sin (radians (theta)) + height/2; //add the offset to center it
   return y;
 }
 
@@ -246,7 +258,7 @@ float getSineY (int theta, float amplitude)
 
 float getCosX (int theta, float amplitude)
 {
-  float x = amplitude * cos (radians (theta)) + width/2; //add the offset to center it 
+  float x = amplitude * cos (radians (theta)) + width/2; //add the offset to center it
   return x;
 }
 
@@ -271,6 +283,9 @@ void keyPressed()
   }
   if (key == 'd') {
     toggles[DRAGF]   = !toggles[DRAGF];
+  }
+  if (key == 's') {
+    toggles[SPRING]  = !toggles[SPRING];
   }
   if (key == '1') {
     makeOrbs(true);

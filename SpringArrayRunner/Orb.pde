@@ -87,14 +87,25 @@ class Orb
   /**
    A method that returns the gravitioanl force between this orb and another orb, by taking a parameter of a gravitaional constant.
    */
+  /*PVector getGravity(Orb other, float G)
+   {
+   float strength = G * mass*other.mass;
+   //dont want to divide by 0!
+   float r = max(center.dist(other.center), MIN_SIZE);
+   strength = strength/ (r * r);
+   PVector force = other.center.copy();
+   force.sub(center);
+   force.mult(strength);
+   return force;
+   }
+   */
+
   PVector getGravity(Orb other, float G)
   {
-    float strength = G * mass*other.mass;
-    //dont want to divide by 0!
-    float r = max(center.dist(other.center), MIN_SIZE);
-    strength = strength/ pow(r, 2);
-    PVector force = other.center.copy();
-    force.sub(center);
+    PVector force = PVector.sub(other.center, center); 
+    float r = max (force.mag(), MIN_SIZE);
+    force.normalize();
+    float strength = G * mass * other.mass / (r * r);
     force.mult(strength);
     return force;
   }
@@ -120,16 +131,16 @@ class Orb
   {
     PVector springForce = new PVector();
     springForce = PVector.sub (other.center, this.center); //sub finds the vector AB, which has to be B - A
-    float x = springForce.mag() - springLength; //has to subtract springLength from the distance from a to B, since x is the distance the spring is stretched 
-    springForce.normalize();  //normalize to  get the unit vector 
-    springForce.mult (springK * x); // multiplies the unit vector by spring constant and displacement to find force. 
-    return springForce; 
+    float x = springForce.mag() - springLength; //has to subtract springLength from the distance from a to B, since x is the distance the spring is stretched
+    springForce.normalize();  //normalize to  get the unit vector
+    springForce.mult (springK * x); // multiplies the unit vector by spring constant and displacement to find force.
+    return springForce;
   }//getSpring
 
 
   /**
    Method that causes the orb to bounce of walls, by making sure the orb's position doesn't leave the bounds.
-   If it does, then set the center of the orb to be within the bounds and then flip velcoity. Returns a boolean if it does exceed the bounds. 
+   If it does, then set the center of the orb to be within the bounds and then flip velcoity. Returns a boolean if it does exceed the bounds.
    */
   boolean yBounce()
   {
@@ -150,7 +161,7 @@ class Orb
 
   /**
    Method that causes the orb to bounce of walls, by making sure the orb's position doesn't leave the bounds.
-   If it does, then set the center of the orb to be within the bounds and then flip velcoity. Returns a boolean if it does exceed the bounds. 
+   If it does, then set the center of the orb to be within the bounds and then flip velcoity. Returns a boolean if it does exceed the bounds.
    */
   boolean xBounce()
   {
@@ -168,7 +179,7 @@ class Orb
 
 
   /**
-   checks if this orb overlaps with another orb. If so return true. 
+   checks if this orb overlaps with another orb. If so return true.
    */
   boolean collisionCheck(Orb other)
   {
@@ -178,14 +189,14 @@ class Orb
 
 
   /**
-    sets the color of the orb to be a color bewteen purple and black. The amount decides which color is favored when mixing the two. 
+   sets the color of the orb to be a color bewteen purple and black. The amount decides which color is favored when mixing the two.
    */
   void setColor()
   {
     color c0 = color(0, 255, 255);
     color c1 = color(0);
     /*
-    Lerpcolor takes two colors and finds a color between the two colors  
+    Lerpcolor takes two colors and finds a color between the two colors
      */
     c = lerpColor(c0, c1, (mass-MIN_SIZE)/(MAX_MASS-MIN_SIZE));
   }//setColor
