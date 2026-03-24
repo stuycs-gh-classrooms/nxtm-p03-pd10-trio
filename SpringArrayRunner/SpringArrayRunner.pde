@@ -68,7 +68,9 @@ void setup()
   earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
- 
+ for (int i = 0; i < orbCount; i++) {
+  orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
+ }
 }//setup
 
 
@@ -150,8 +152,8 @@ void makeOrbs(boolean ordered)
     {
       int theta = 30;
       int amplitude = 40;
-      float x = getCosX (theta * i, amplitude * i + 100); //+ 100 offset makes sure the orbs don't spawn on earth
-      float y = getSineY (theta * i, amplitude * i+ 100);
+      float x = getCosX (theta * i, amplitude * i + 100 ); //+ 100 offset makes sure the orbs don't spawn on earth
+      float y = getSineY (theta * i, amplitude * i + 100);
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
       orbs[i] = new Orb (x, y, mass, bsize);

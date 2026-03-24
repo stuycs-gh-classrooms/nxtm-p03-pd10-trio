@@ -102,12 +102,23 @@ class Orb
 
   PVector getGravity(Orb other, float G)
   {
-    PVector force = PVector.sub(other.center, center); 
+    PVector force = PVector.sub(other.center, center);
     float r = max (force.mag(), MIN_SIZE);
     force.normalize();
     float strength = G * mass * other.mass / (r * r);
     force.mult(strength);
     return force;
+  }
+
+  PVector getCriticalVelocity(FixedOrb other, float G) {
+    PVector r = PVector.sub(other.center, center);
+    float r_mag = max (r.mag(), MIN_SIZE);
+    float criticalVelocity = sqrt((G*other.mass)/r_mag);
+    r.normalize(); // shrink vector so the the orbs don't fly off screen
+    r.mult(criticalVelocity);
+    r.rotate(HALF_PI);
+    // we need to rotate the directon of the vector so it's pointing 90 degrees from the fixed orb
+    return r;
   }
 
   /**
