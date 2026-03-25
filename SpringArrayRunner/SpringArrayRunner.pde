@@ -75,8 +75,6 @@ void setup()
   earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
-
-  
 }//setup
 
 
@@ -85,11 +83,11 @@ void draw()
   background(255);
   displayMode();
   earth.display();
-    if (toggles[Orbit]) //if orbit is toggled, then each orbit will get an tangental velocity that lets it orbit 
+  if (toggles[Orbit]) //if orbit is toggled, then each orbit will get an tangental velocity that lets it orbit
   {
-  for (int i = 0; i < orbCount; i++) {
-    orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
-  }
+    for (int i = 0; i < orbCount; i++) {
+      orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
+    }
   }
 
   //draw the orbs and springs
@@ -291,8 +289,8 @@ float getCosX (int theta, float amplitude)
   return x;
 }
 
-/* old code that's outdated 
-
+/* old code that's outdated
+ 
  void setTangentialVelocity (Orb o)
  {
  PVector direction = PVector.sub (earth.center, o.center);
