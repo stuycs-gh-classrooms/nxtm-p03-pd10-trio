@@ -71,7 +71,7 @@ void setup()
   size(1000, 1000);
 
   //Part 0: Write makeOrbs below
-  earth = new FixedOrb (width/2, height/2, 100, 200); //set earth to be in the middle
+  earth = new FixedOrb (width/2, height/2, 100, 30000); //set earth to be in the middle
   earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
@@ -177,8 +177,8 @@ void makeOrbs(boolean ordered)
     {
       int theta = 30;
       int amplitude = 40;
-      float x = getCosX (theta * i, amplitude * i + 100 ); //+ 100 offset makes sure the orbs don't spawn on earth
-      float y = getSineY (theta * i, amplitude * i + 100);
+      float x = getCosX (theta , amplitude * i + 100 ); //+ 100 offset makes sure the orbs don't spawn on earth
+      float y = getSineY (theta , amplitude * i + 100); //can use theta * i
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
       orbs[i] = new Orb (x, y, mass, bsize, int (random (-2, 2))); //int rounds upwards so by including -2, it creates negative charges
