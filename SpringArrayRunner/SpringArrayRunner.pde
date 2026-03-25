@@ -42,7 +42,7 @@ float MIN_MASS = 10;
 float MAX_MASS = 100;
 float G_CONSTANT = 1;
 float D_COEF = 0.1;
-float K_CONSTANT = 100;
+float K_CONSTANT = 100; //K constant has to be pretty big to see a visual effect
 
 int SPRING_LENGTH = 50;
 float  SPRING_K = 0.005;
@@ -53,12 +53,13 @@ int GRAVITY = 2;
 int DRAGF = 3;
 int SPRING = 4;
 int ElectroS = 5;
+int Orbit = 6;
 
 int Positive = 1;
 int Negative = -1;
 
-boolean[] toggles = new boolean[6];
-String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring", "ElectroS"};
+boolean[] toggles = new boolean[7];
+String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring", "ElectroS", "Orbit"};
 
 FixedOrb earth;
 Orb[] orbs;
@@ -74,9 +75,8 @@ void setup()
   earth.c = #0000FF;
   makeOrbs(true);
   //Part 3: create earth to simulate gravity
-  for (int i = 0; i < orbCount; i++) {
-    orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
-  }
+
+  
 }//setup
 
 
@@ -85,6 +85,12 @@ void draw()
   background(255);
   displayMode();
   earth.display();
+    if (toggles[Orbit]) //if orbit is toggled, then each orbit will get an tangental velocity that lets it orbit 
+  {
+  for (int i = 0; i < orbCount; i++) {
+    orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
+  }
+  }
 
   //draw the orbs and springs
   for (int o=0; o < orbCount; o++) {
@@ -121,13 +127,19 @@ void draw()
       }
       if (toggles [ElectroS])
       {
-        if (orbs[o].charge != 0)
+        for (int i = 0; i < orbCount; i ++) //loops through the orbs list twice, and if they two orbs at the indexs aren't the same apply e force
         {
-
-          orbs[o].applyForce (orbs[o].getElectricStatic (earth, K_CONSTANT));
+          for (int j = 0; j < orbCount; j ++)
+          {
+            if (i != j)
+            {
+              orbs[i].applyForce (orbs[i].getElectricStatic (orbs[j], K_CONSTANT)); // if the charge of one is 0, then it will zero out
+            }
+          }
         }
       }
-    }//gravity, drag, and electrostatic
+    }
+    //gravity, drag, and electrostatic
 
 
     for (int o=0; o < orbCount; o++) {
@@ -171,7 +183,7 @@ void makeOrbs(boolean ordered)
       float y = getSineY (theta * i, amplitude * i + 100);
       float mass = random(10, 100);
       float bsize = random(10, MAX_SIZE);
-      orbs[i] = new Orb (x, y, mass, bsize, int (random (-2, 2))); //int rounds upwards so by including -2, it creates negative chargess
+      orbs[i] = new Orb (x, y, mass, bsize, int (random (-2, 2))); //int rounds upwards so by including -2, it creates negative charges
       //setTangentialVelocity (orbs[i]); //spawns the orbs with tangental velocity that let them orbit , but if velocity ever changes, it will fall out of orbit
     } else {
       orbs[i] = new Orb(); //random position generators
@@ -279,7 +291,7 @@ float getCosX (int theta, float amplitude)
   return x;
 }
 
-/*
+/* old code that's outdated 
 
  void setTangentialVelocity (Orb o)
  {
@@ -320,6 +332,9 @@ void keyPressed()
   }
   if (key == 'e') {
     toggles[ElectroS]  = !toggles[ElectroS];
+  }
+  if (key == 'o') {
+    toggles[Orbit]  = !toggles[Orbit];
   }
   if (key == '1') {
     makeOrbs(true);

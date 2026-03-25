@@ -128,17 +128,13 @@ class Orb
 
 
   //K is the electrostatic constant, but we will keep it a smaller number
-  PVector getElectricStatic (FixedOrb other, float K)
+  PVector getElectricStatic (Orb other, float K)
   {
-    PVector force = PVector.sub(other.center, center);
+    PVector force = PVector.sub(center, other.center);
     float r = max (force.mag(), MIN_SIZE);
     force.normalize();
-    float strength = K * abs (charge * other.charge) / (r * r);
+    float strength = K * (charge * other.charge) / (r * r);
     force.mult(strength);
-    if ((charge > 0 &&  other.charge > 0) || (charge < 0 && other.charge <0))
-    {
-      force.rotate (PI);
-    }
     return force;
   }
 
@@ -241,13 +237,13 @@ class Orb
     fill(c);
     circle(center.x, center.y, bsize);
     fill(255);
-    if (charge == Positive)
+    if (charge >= Positive)
     {   
       textAlign(CENTER,CENTER);
       textSize (int (bsize / 2));
       text ("+", center.x, center.y);
     }
-    if (charge == Negative)
+    if (charge <= Negative)
     {
       textAlign(CENTER,CENTER);
       textSize (int (bsize / 2));
