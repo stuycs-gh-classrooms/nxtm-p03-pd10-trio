@@ -1,0 +1,3 @@
+- We are going to lower the k constant
+- We are going to create an unordered five-particle simulation. We will also have an option for an ordered 2D solar system particle model if we have time to make it.
+- Each particle will have a negative, positive, or 0 signfying their charge

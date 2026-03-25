@@ -1,0 +1,378 @@
+
+/**
+ Alex J, Tashfia Diha, Wenbo Zhou
+ 2026-03-16
+ P03 -- making a custom force
+ time spent: N/A
+ */
+
+/** -----------------------------------------------
+ SpringArrayDriver (Most Work Goes Here)
+ 
+ TASK:
+ You will write a program that creates an array of orbs.
+ When run, the simulation should show the orbs,
+ connected by springs,
+ moving according to the push/pull of the spring forces.
+ 
+ Earth gravity will be a toggle-able option,
+ as well as whether the simulation is running movement or not.
+ 
+ Part 0: Create and populate the array of orbs.
+ 
+ Part 1: Draw the "springs" connecting the orbs.
+ 
+ Part 2: Calculate and apply the spring force to the
+ orbs in the array.
+ Part 3: Apply earth based gravity and drag if those
+ options are turned on.
+ 
+ Part 4: Allow for the removal and addition of orbs
+ 
+ CONCURRENT TASK:
+ As you go, or just before you submit,
+ Fill in the placeholder comment zones with YOUR OWN WORDS.
+ ----------------------------------------------- */
+
+
+int NUM_ORBS = 10;
+int MIN_SIZE = 10;
+int MAX_SIZE = 100;
+float MIN_MASS = 10;
+float MAX_MASS = 100;
+float G_CONSTANT = 1;
+float D_COEF = 0.1;
+float K_CONSTANT = 100; //K constant has to be pretty big to see a visual effect
+
+int SPRING_LENGTH = 50;
+float  SPRING_K = 0.005;
+
+int MOVING = 0;
+int BOUNCE = 1;
+int GRAVITY = 2;
+int DRAGF = 3;
+int SPRING = 4;
+int ElectroS = 5;
+int Orbit = 6;
+
+int Positive = 1;
+int Negative = -1;
+
+boolean[] toggles = new boolean[7];
+String[] modes = {"Moving", "Bounce", "Gravity", "Drag", "Spring", "ElectroS", "Orbit"};
+
+FixedOrb earth;
+Orb[] orbs;
+int orbCount;
+
+
+void setup()
+{
+  size(1000, 1000);
+
+  //Part 0: Write makeOrbs below
+  earth = new FixedOrb (width/2, height/2, 100, 30000); //set earth to be in the middle
+  earth.c = #0000FF;
+  makeOrbs(true);
+  //Part 3: create earth to simulate gravity
+}//setup
+
+
+void draw()
+{
+  background(255);
+  displayMode();
+  earth.display();
+  if (toggles[Orbit]) //if orbit is toggled, then each orbit will get an tangental velocity that lets it orbit
+  {
+    for (int i = 0; i < orbCount; i++) {
+      orbs[i].velocity = orbs[i].getCriticalVelocity(earth, G_CONSTANT).copy();
+    }
+  }
+
+  //draw the orbs and springs
+  for (int o=0; o < orbCount; o++) {
+    orbs[o].display();
+    if (toggles [SPRING])
+    {
+      if (o != orbCount -1)
+      {
+        drawSpring (orbs[o], orbs[o + 1]);
+      }
+    }
+
+    //Part 1: write drawSpring below
+    //Use drawspring correctly to draw springs
+  }//draw orbs & springs
+
+  if (toggles[MOVING]) {
+    //applies spring force when spring force is toggled
+
+    if (toggles [SPRING])
+    {
+      applySprings();
+    }
+
+    //part 3: apply other forces if toggled on
+    for (int o=0; o < orbCount; o++) {
+      if (toggles[GRAVITY])
+      {
+        orbs[o].applyForce (orbs[o].getGravity (earth, G_CONSTANT));
+      }
+      if (toggles[DRAGF])
+      {
+        orbs[o].applyForce (orbs[o].getDragForce (D_COEF ));
+      }
+      if (toggles [ElectroS])
+      {
+        for (int i = 0; i < orbCount; i ++) //loops through the orbs list twice, and if they two orbs at the indexs aren't the same apply e force
+        {
+          for (int j = 0; j < orbCount; j ++)
+          {
+            if (i != j)
+            {
+              orbs[i].applyForce (orbs[i].getElectricStatic (orbs[j], K_CONSTANT)); // if the charge of one is 0, then it will zero out
+            }
+          }
+        }
+      }
+    }
+    //gravity, drag, and electrostatic
+
+
+    for (int o=0; o < orbCount; o++) {
+      orbs[o].move(toggles[BOUNCE]);
+    }
+  }//moving
+}//draw
+
+
+/**
+ makeOrbs(boolean ordered)
+ 
+ Set orbCount to NUM_ORBS
+ Initialize and create orbCount Orbs in orbs.
+ All orbs should have random mass and size.
+ The first orb should be a FixedOrb
+ If ordered is true:
+ The orbs should be spaced SPRING_LENGTH distance
+ apart along the middle of the screen.
+ If ordered is false:
+ The orbs should be positioned radomly.
+ 
+ Each orb will be "connected" to its neighbors in the array.
+ */
+void makeOrbs(boolean ordered)
+{
+  orbCount = NUM_ORBS;
+  orbs = new Orb[orbCount];
+  for (int i = 0; i < orbCount; i ++)
+  {
+    /*if (i == 0)
+     {
+     orbs[i] = new FixedOrb(); //first orb is fixed
+     }
+     */
+    if (ordered)
+    {
+      int theta = 30;
+      int amplitude = 40;
+      float x = getCosX (theta , amplitude * i + 100 ); //+ 100 offset makes sure the orbs don't spawn on earth
+      float y = getSineY (theta , amplitude * i + 100); //can use theta * i
+      float mass = random(10, 100);
+      float bsize = random(10, MAX_SIZE);
+      orbs[i] = new Orb (x, y, mass, bsize, int (random (-2, 2))); //int rounds upwards so by including -2, it creates negative charges
+      //setTangentialVelocity (orbs[i]); //spawns the orbs with tangental velocity that let them orbit , but if velocity ever changes, it will fall out of orbit
+    } else {
+      orbs[i] = new Orb(); //random position generators
+    }
+  }
+}//makeOrbs
+
+
+/**
+ drawSpring(Orb o0, Orb o1)
+ 
+ Draw a line between the two Orbs.
+ Line color should change as follows:
+ red: The spring is stretched.
+ green: The spring is compressed.
+ black: The spring is at its normal length
+ */
+void drawSpring(Orb o0, Orb o1)
+{
+  float distance = dist (o0.center.x, o0.center.y, o1.center.x, o1.center.y);
+  if (distance > SPRING_LENGTH)
+  {
+    stroke (255, 0, 0);
+  } else if (distance < SPRING_LENGTH)
+  {
+    stroke (0, 255, 0);
+  } else if (distance == SPRING_LENGTH)
+  {
+    stroke (0);
+  }
+  line (o0.center.x, o0.center.y, o1.center.x, o1.center.y);
+  line (o0.center.x + 2, o0.center.y + 2, o1.center.x + 2, o1.center.y + 2);
+}//drawSpring
+
+
+/**
+ applySprings()
+ 
+ FIRST: Fill in getSpring in the Orb class.
+ 
+ THEN:
+ Go through the Orbs array and apply the spring
+ force correctly for each orb. We will consider every
+ orb as being "connected" via a spring to is
+ neighboring orbs in the array.
+ */
+void applySprings()
+{
+  for (int o = 0; o <orbCount; o ++)
+  {
+    if (o <  orbCount - 1)
+    {
+      PVector sForce = orbs[o].getSpring (orbs[o +1], SPRING_LENGTH, SPRING_K);
+      orbs[o].applyForce (sForce);
+      PVector opposite = sForce.copy().mult (-1); //the other orb has to feel another force as well
+      orbs[o+1].applyForce (opposite);
+    }
+  }
+}//applySprings
+
+
+/**
+ addOrb()
+ 
+ Add an orb to the arry of orbs.
+ 
+ If the array of orbs is full, make a
+ new, larger array that contains all
+ the current orbs and the new one.
+ (check out arrayCopy() to help)
+ */
+void addOrb()
+{
+  Orb [] tempArr; //creates temp array
+  tempArr = new Orb [orbCount + 1]; //sets its length to be one more than orbs
+  arrayCopy (orbs, 0, tempArr, 0, orbCount); // copies the entire array of Orbs and pastes it on to tempArry
+  tempArr[tempArr.length -1] = new Orb(); //add a new orb to the last index of tempArr
+  orbs = tempArr; //set orbs to tempArr
+  orbCount ++; //increases the orbCOunt
+}//addOrb
+
+void removeOrb ()
+{
+  Orb [] tempArr;
+  tempArr = new Orb [orbCount - 1];
+  arrayCopy (orbs, 0, tempArr, 0, orbCount -1);
+  orbs = tempArr;
+  orbCount --;
+}
+
+//takes a theta + amplitdude and returns a y value by taking the sin value
+
+float getSineY (int theta, float amplitude)
+{
+  float y = amplitude * sin (radians (theta)) + height/2; //add the offset to center it
+  return y;
+}
+
+
+//takes a theta + amplitude and returns a x value by taking the cos value
+
+float getCosX (int theta, float amplitude)
+{
+  float x = amplitude * cos (radians (theta)) + width/2; //add the offset to center it
+  return x;
+}
+
+/* old code that's outdated
+ 
+ void setTangentialVelocity (Orb o)
+ {
+ PVector direction = PVector.sub (earth.center, o.center);
+ float r = direction.mag();
+ direction.normalize();
+ PVector tangent = new PVector (-direction.y, direction.x);
+ float speed = sqrt (G_CONSTANT * earth.mass / r); //from formula for orbit speed. If the speed is any greater, then the orbs will escape orbit
+ tangent.mult (speed);
+ o.velocity = tangent;
+ }
+ 
+/*
+ 
+/**
+ keyPressed()
+ 
+ Toggle the various modes on and off
+ Use 1 and 2 to setup model.
+ Use - and + to add/remove orbs.
+ */
+void keyPressed()
+{
+  if (key == ' ') {
+    toggles[MOVING]  = !toggles[MOVING];
+  }
+  if (key == 'g') {
+    toggles[GRAVITY] = !toggles[GRAVITY];
+  }
+  if (key == 'b') {
+    toggles[BOUNCE]  = !toggles[BOUNCE];
+  }
+  if (key == 'd') {
+    toggles[DRAGF]   = !toggles[DRAGF];
+  }
+  if (key == 's') {
+    toggles[SPRING]  = !toggles[SPRING];
+  }
+  if (key == 'e') {
+    toggles[ElectroS]  = !toggles[ElectroS];
+  }
+  if (key == 'o') {
+    toggles[Orbit]  = !toggles[Orbit];
+  }
+  if (key == '1') {
+    makeOrbs(true);
+  }
+  if (key == '2') {
+    makeOrbs(false);
+  }
+
+  if (key == '-') {
+    //Part 4: Write code to remove an orb from the array
+    removeOrb();
+  }//removal
+  if (key == '=' || key == '+') {
+    //Part 4: Write addOrb() below
+    addOrb();
+  }//addition
+}//keyPressed
+
+
+
+void displayMode()
+{
+  textAlign(LEFT, TOP);
+  textSize(20);
+  noStroke();
+  int spacing = 85;
+  int x = 0;
+
+  for (int m=0; m<toggles.length; m++) {
+    //set box color
+    if (toggles[m]) {
+      fill(0, 255, 0);
+    } else {
+      fill(255, 0, 0);
+    }
+
+    float w = textWidth(modes[m]);
+    rect(x, 0, w+5, 20);
+    fill(0);
+    text(modes[m], x+2, 2);
+    x+= w+5;
+  }
+}//display
